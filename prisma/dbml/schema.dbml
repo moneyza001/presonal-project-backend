@@ -1,0 +1,98 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id Int [pk, increment]
+  phoneNumber String [unique, not null]
+  password String [unique, not null]
+  role ROLE [not null, default: 'USER']
+  HairStyleList HairStyleList [not null]
+  Member Member [not null]
+  Book Book [not null]
+}
+
+Table Member {
+  id Int [pk, increment]
+  firstName String [not null]
+  lastName String [not null]
+  nickName String [not null]
+  gender GENDER [not null]
+  birthDate DateTime [not null]
+  email String
+  image String
+  user User [not null]
+  userId Int [not null]
+}
+
+Table HairStyleList {
+  id Int [pk, increment]
+  hairStyliestName String [not null]
+  hairStlylistImage String
+  workExpImage String
+  user User [not null]
+  HairStyleListService HairStyleListService [not null]
+  userId Int [not null]
+}
+
+Table Service {
+  id Int [pk, increment]
+  serviceName String [not null]
+  price Decimal [not null]
+  HairStyleListService HairStyleListService [not null]
+  BookService BookService [not null]
+}
+
+Table HairStyleListService {
+  id Int [pk, increment]
+  seveice Service [not null]
+  serviceId Int [not null]
+  hairStylelist HairStyleList [not null]
+  hairStyleListId Int [not null]
+}
+
+Table Book {
+  id Int [pk, increment]
+  user User [not null]
+  userId Int [not null]
+  bookDate DateTime [not null]
+  bookTime DateTime [not null]
+  urlDeposite String
+  urlFullPay String
+  totalPrice Decimal [not null]
+  depositeStatus Boolean
+  BookService BookService [not null]
+}
+
+Table BookService {
+  id Int [pk, increment]
+  book Book [not null]
+  bookId Int [not null]
+  service Service [not null]
+  serviceId Int [not null]
+}
+
+Enum ROLE {
+  ADMIN
+  USER
+}
+
+Enum GENDER {
+  MALE
+  FEMALE
+  OTHER
+}
+
+Ref: Member.userId > User.id
+
+Ref: HairStyleList.userId > User.id
+
+Ref: HairStyleListService.serviceId > Service.id
+
+Ref: HairStyleListService.hairStyleListId > HairStyleList.id
+
+Ref: Book.userId > User.id
+
+Ref: BookService.bookId > Book.id
+
+Ref: BookService.serviceId > Service.id

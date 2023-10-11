@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int                @id @default(autoincrement())
+  email            String?            @unique
+  password         String             @unique
+  role             ROLE               @default(USER)
+  hairStyleList    HairStyleList[]
+  memberInfomation MemberInfomation[]
+  Bookking         Bookking[]
+
+  @@map("user")
+}
+
+enum ROLE {
+  ADMIN
+  USER
+}
+
+model MemberInfomation {
+  id          Int       @id @default(autoincrement())
+  firstName   String    @map("first_name")
+  lastName    String    @map("last_name")
+  nickName    String    @map("nick_name")
+  gender      GENDER?
+  birthDate   DateTime? @map("birth_date") @db.Date
+  phoneNumber String    @map("phone_number") @db.VarChar(10)
+  image       String?
+  user        User      @relation(fields: [userId], references: [id])
+  userId      Int
+
+  @@map("member_infomation")
+}
+
+enum GENDER {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model HairStyleList {
+  id                   Int                    @id @default(autoincrement())
+  hairStylistName      String                 @map("hair_style_list_name")
+  hairStlylistImage    String?                @map("hair_style_list_image")
+  workExpImage         String?                @map("work_exe_image")
+  user                 User                   @relation(fields: [userId], references: [id])
+  HairStyleListService HairStyleListService[]
+  userId               Int                    @map("user_id")
+
+  @@map("hair_stylelist")
+}
+
+model Service {
+  id                   Int                    @id @default(autoincrement())
+  serviceName          String                 @map("service_name")
+  price                Decimal
+  HairStyleListService HairStyleListService[]
+  BookService          BookService[]
+
+  @@map("service")
+}
+
+model HairStyleListService {
+  id              Int           @id @default(autoincrement())
+  seveice         Service       @relation(fields: [serviceId], references: [id])
+  serviceId       Int           @map("service_id")
+  hairStylelist   HairStyleList @relation(fields: [hairStyleListId], references: [id])
+  hairStyleListId Int           @map("hair_style_list_id")
+
+  @@map("hair_stylelist_service")
+}
+
+model Bookking {
+  id             Int           @id @default(autoincrement())
+  user           User          @relation(fields: [userId], references: [id])
+  userId         Int           @map("user_id")
+  bookDate       DateTime      @db.Date
+  bookTime       DateTime      @db.Time(4)
+  urlDeposite    String?       @map("url_deposite")
+  urlFullPay     String?       @map("url_full_pay")
+  totalPrice     Decimal       @map("total_price")
+  createdAt      DateTime      @default(now())
+  depositeStatus Boolean?      @map("deposite_status")
+  BookService    BookService[]
+
+  @@map("bookking")
+}
+
+model BookService {
+  id        Int      @id @default(autoincrement())
+  bookking  Bookking @relation(fields: [bookId], references: [id])
+  bookId    Int      @map("book_id")
+  service   Service  @relation(fields: [serviceId], references: [id])
+  serviceId Int      @map("service_id")
+
+  @@map("book_service")
+}
