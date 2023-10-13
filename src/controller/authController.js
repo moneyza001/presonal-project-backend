@@ -13,10 +13,13 @@ exports.register = async (req, res, next) => {
         const { email, password, role, ...personalInfo } = value;
         const hashPassword = await bcrypt.hash(password, 12);
         const user = await prisma.user.create({
-            data: { email, password: hashPassword, role },
+            data: { email, password: hashPassword },
         });
         personalInfo.userId = user.id;
+        console.log(personalInfo);
+        console.log(role);
         if (role === "USER") {
+            console.log(personalInfo);
             await prisma.memberInfomation.create({
                 data: personalInfo,
             });

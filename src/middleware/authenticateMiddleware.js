@@ -13,7 +13,6 @@ module.exports = async (req, res, next) => {
             token,
             process.env.JWT_SECRET_KEY || "nkwefnlkn23rlf32"
         );
-        // console.log(playload);
         const user = await prisma.user.findUnique({
             where: {
                 id: playload.userLoginId,
