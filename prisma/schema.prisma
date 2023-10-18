@@ -12,9 +12,9 @@ model User {
   email            String?            @unique
   password         String             @unique
   role             ROLE               @default(USER)
-  hairStyleList    HairStyleList[]
+  hairStylist      HairStylist[]
   memberInfomation MemberInfomation[]
-  Bookking         Bookking[]
+  booking          Booking[]
 
   @@map("user")
 }
@@ -45,60 +45,71 @@ enum GENDER {
   OTHER
 }
 
-model HairStyleList {
-  id                   Int                    @id @default(autoincrement())
-  hairStylistName      String                 @map("hair_style_list_name")
-  hairStlylistImage    String?                @map("hair_style_list_image")
-  workExpImage         String?                @map("work_exe_image")
-  user                 User                   @relation(fields: [userId], references: [id])
-  HairStyleListService HairStyleListService[]
-  userId               Int                    @map("user_id")
+model HairStylist {
+  id                 Int                  @id @default(autoincrement())
+  hairStylistName    String               @map("hair_stylist_name")
+  hairStylistImage   String?              @map("hair_stylist_image")
+  workExpImage       String?              @map("work_exe_image")
+  user               User                 @relation(fields: [userId], references: [id])
+  hairStylistService HairStylistService[]
+  userId             Int                  @map("user_id")
+  booking            Booking[]
 
-  @@map("hair_stylelist")
+  @@map("hair_stylist")
 }
 
 model Service {
-  id                   Int                    @id @default(autoincrement())
-  serviceName          String                 @map("service_name")
-  price                Decimal
-  HairStyleListService HairStyleListService[]
-  BookService          BookService[]
+  id                 Int                  @id @default(autoincrement())
+  serviceName        String               @map("service_name")
+  price              Decimal              @db.Decimal()
+  serviceImage       String?              @map("service_image")
+  hairStylistService HairStylistService[]
+  bookService        BookService[]
 
   @@map("service")
 }
 
-model HairStyleListService {
-  id              Int           @id @default(autoincrement())
-  seveice         Service       @relation(fields: [serviceId], references: [id])
-  serviceId       Int           @map("service_id")
-  hairStylelist   HairStyleList @relation(fields: [hairStyleListId], references: [id])
-  hairStyleListId Int           @map("hair_style_list_id")
+model HairStylistService {
+  id            Int         @id @default(autoincrement())
+  seveice       Service     @relation(fields: [serviceId], references: [id])
+  serviceId     Int         @map("service_id")
+  hairStylist   HairStylist @relation(fields: [hairStylistId], references: [id])
+  hairStylistId Int         @map("hair_style_list_id")
 
-  @@map("hair_stylelist_service")
+  @@map("hair_stylist_service")
 }
 
-model Bookking {
+model Booking {
   id             Int           @id @default(autoincrement())
   user           User          @relation(fields: [userId], references: [id])
   userId         Int           @map("user_id")
-  bookDate       DateTime      @db.Date
-  bookTime       DateTime      @db.Time(4)
+  bookDate       DateTime      @map("book_date") @db.Date
+  bookTime       String        @map("book_time")
   urlDeposite    String?       @map("url_deposite")
   urlFullPay     String?       @map("url_full_pay")
-  totalPrice     Decimal       @map("total_price")
+  totalPrice     Decimal?      @map("total_price") @db.Decimal(10, 2)
   createdAt      DateTime      @default(now())
   depositeStatus Boolean?      @map("deposite_status")
-  BookService    BookService[]
+  bookService    BookService[]
+  status         STATUS
+  hairStylist    HairStylist   @relation(fields: [hairStylistId], references: [id])
+  hairStylistId  Int
 
-  @@map("bookking")
+  @@map("booking")
+}
+
+enum STATUS {
+  PENDING
+  ACCEPTED
+  DENINED
 }
 
 model BookService {
-  id        Int      @id @default(autoincrement())
-  bookking  Bookking @relation(fields: [bookId], references: [id])
-  bookId    Int      @map("book_id")
-  service   Service  @relation(fields: [serviceId], references: [id])
-  serviceId Int      @map("service_id")
+  id        Int     @id @default(autoincrement())
+  booking   Booking @relation(fields: [bookId], references: [id])
+  bookId    Int     @map("book_id")
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int     @map("service_id")
 
   @@map("book_service")
 }

@@ -13,7 +13,7 @@ exports.register = async (req, res, next) => {
         const { email, password, role, ...personalInfo } = value;
         const hashPassword = await bcrypt.hash(password, 12);
         const user = await prisma.user.create({
-            data: { email, password: hashPassword },
+            data: { email, password: hashPassword, role },
         });
         personalInfo.userId = user.id;
         console.log(personalInfo);
@@ -25,7 +25,7 @@ exports.register = async (req, res, next) => {
             });
         }
         if (role === "ADMIN") {
-            await prisma.hairStyleList.create({
+            await prisma.hairStylist.create({
                 data: {
                     hairStylistName: personalInfo.firstName,
                     userId: user.id,
@@ -33,8 +33,7 @@ exports.register = async (req, res, next) => {
             });
         }
         delete user.password;
-        const accessToken = createAccessToken(user.id);
-        res.status(201).json({ user, personalInfo, accessToken });
+        res.status(201).json({ user, personalInfo });
     } catch (error) {
         next(error);
     }
@@ -63,4 +62,8 @@ exports.login = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
+};
+
+exports.getUser = (req, res, next) => {
+    res.status(200).json({ user: req.user });
 };

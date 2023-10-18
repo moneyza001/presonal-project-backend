@@ -16,3 +16,14 @@ exports.createService = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getService = async (req, res, next) => {
+    try {
+        const service = await prisma.service.findMany({
+            take: 6,
+        });
+        res.status(200).json(service);
+    } catch (error) {
+        next(error);
+    }
+};

@@ -1,9 +1,14 @@
 const exprees = require("express");
+const authenticateMiddleware = require("../middleware/authenticateMiddleware");
 
-const { createService } = require("../controller/serviceController");
+const {
+    createService,
+    getService,
+} = require("../controller/serviceController");
 
 const router = exprees.Router();
 
-router.post("/", createService);
+router.post("/", authenticateMiddleware, createService);
+router.get("/", getService);
 
 module.exports = router;
