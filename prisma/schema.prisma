@@ -91,7 +91,7 @@ model Booking {
   createdAt      DateTime      @default(now())
   depositeStatus Boolean?      @map("deposite_status")
   bookService    BookService[]
-  status         STATUS
+  status         STATUS        @default(PENDING)
   hairStylist    HairStylist   @relation(fields: [hairStylistId], references: [id])
   hairStylistId  Int
 

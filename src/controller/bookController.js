@@ -1,10 +1,10 @@
 const createError = require("../Utilities/createError");
 const prisma = require("../model/prisma");
-const { bookingSchema } = require("../validators/bookValidator");
+const { makeBookingSchema } = require("../validators/bookValidator");
 
 exports.createBooking = async (req, res, next) => {
     try {
-        const { value, error } = bookingSchema.validate(req.body);
+        const { value, error } = makeBookingSchema().validate(req.body);
         if (error) {
             return next(error);
         }
