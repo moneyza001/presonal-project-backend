@@ -7,7 +7,7 @@ const makeBookingSchema = () => {
             now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate()
         ),
         bookTime: Joi.string().required(),
-        serviceName: Joi.string().required(),
+        serviceId: Joi.number().required(),
     }).options({ allowUnknown: true });
     return bookingSchema;
 };

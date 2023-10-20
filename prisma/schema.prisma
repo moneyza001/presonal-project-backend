@@ -84,7 +84,7 @@ model Booking {
   user           User          @relation(fields: [userId], references: [id])
   userId         Int           @map("user_id")
   bookDate       DateTime      @map("book_date") @db.Date
-  bookTime       String        @map("book_time")
+  bookTimeId     Int
   urlDeposite    String?       @map("url_deposite")
   urlFullPay     String?       @map("url_full_pay")
   totalPrice     Decimal?      @map("total_price") @db.Decimal(10, 2)
@@ -94,6 +94,7 @@ model Booking {
   status         STATUS        @default(PENDING)
   hairStylist    HairStylist   @relation(fields: [hairStylistId], references: [id])
   hairStylistId  Int
+  bookTime       BookTime      @relation(fields: [bookTimeId], references: [id])
 
   @@map("booking")
 }
@@ -102,6 +103,12 @@ enum STATUS {
   PENDING
   ACCEPTED
   DENINED
+}
+
+model BookTime {
+  id       Int       @id @default(autoincrement())
+  bookTime String
+  Booking  Booking[]
 }
 
 model BookService {

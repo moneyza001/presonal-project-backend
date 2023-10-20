@@ -8,29 +8,21 @@ exports.createBooking = async (req, res, next) => {
         if (error) {
             return next(error);
         }
-        console.log(value);
         value.userId = req.user.id;
 
-        const { serviceName, ...bookDetail } = value;
+        const { serviceId, ...bookingDetail } = value;
 
-        console.log(bookDetail);
         const booking = await prisma.booking.create({
-            data: bookDetail,
-        });
-
-        const serviceItem = await prisma.service.findFirst({
-            where: {
-                serviceName,
-            },
+            data: bookingDetail,
         });
         await prisma.bookService.create({
             data: {
                 bookId: booking.id,
-                serviceId: serviceItem.id,
+                serviceId,
             },
         });
 
-        res.status(200).json({ message: "create success" });
+        res.status(200).json({ message: "Create success" });
     } catch (error) {
         next(error);
     }
@@ -59,7 +51,44 @@ exports.getBooking = async (req, res, next) => {
                 },
             },
         });
-        res.status(200).json({ targetBooking });
+        res.status(200).json(targetBooking);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getBookingForAdmin = async (req, res, next) => {
+    try {
+        const targetBooking = await prisma.booking.findMany({
+            where: {
+                hairStylistId: req.user.id,
+            },
+            include: {
+                hairStylist: {
+                    select: {
+                        hairStylistName: true,
+                    },
+                },
+                bookService: {
+                    include: {
+                        service: {
+                            select: {
+                                serviceName: true,
+                            },
+                        },
+                    },
+                },
+                user: {
+                    include: {
+                        memberInfomation: true,
+                    },
+                },
+            },
+            orderBy: {
+                bookDate: "asc",
+            },
+        });
+        res.status(200).json(targetBooking);
     } catch (error) {
         next(error);
     }
