@@ -27,3 +27,12 @@ exports.getService = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getAllService = async (req, res, next) => {
+    try {
+        const allService = await prisma.service.findMany({});
+        res.status(200).json(allService);
+    } catch (error) {
+        next(error);
+    }
+};

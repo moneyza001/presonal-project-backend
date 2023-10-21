@@ -9,20 +9,25 @@ exports.createBooking = async (req, res, next) => {
             return next(error);
         }
         value.userId = req.user.id;
-
         const { serviceId, ...bookingDetail } = value;
 
-        const booking = await prisma.booking.create({
-            data: bookingDetail,
-        });
-        await prisma.bookService.create({
-            data: {
-                bookId: booking.id,
-                serviceId,
-            },
+        const findBooked = await prisma.booking.findFirst({
+            where: bookingDetail,
         });
 
-        res.status(200).json({ message: "Create success" });
+        if (!findBooked) {
+            const booking = await prisma.booking.create({
+                data: bookingDetail,
+            });
+
+            await prisma.bookService.create({
+                data: {
+                    bookId: booking.id,
+                    serviceId,
+                },
+            });
+            return res.status(200).json({ message: "Create success" });
+        }
     } catch (error) {
         next(error);
     }
@@ -89,6 +94,24 @@ exports.getBookingForAdmin = async (req, res, next) => {
             },
         });
         res.status(200).json(targetBooking);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.findBookedWithTimeAndHairStylistId = async (req, res, next) => {
+    const { bookDate, hairStylistId } = req.body;
+    try {
+        const newBookDate = new Date(bookDate);
+        const bookedItem = await prisma.booking.findMany({
+            where: {
+                AND: [
+                    { bookDate: newBookDate },
+                    { hairStylistId: +hairStylistId },
+                ],
+            },
+        });
+        res.status(200).json(bookedItem);
     } catch (error) {
         next(error);
     }
