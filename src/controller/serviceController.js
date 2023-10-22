@@ -36,3 +36,12 @@ exports.getAllService = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getHairStylist = async (req, res, next) => {
+    try {
+        const hairStylist = await prisma.hairStylist.findMany();
+        res.status(200).json(hairStylist);
+    } catch (error) {
+        next(error);
+    }
+};

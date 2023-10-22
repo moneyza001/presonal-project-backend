@@ -1,6 +1,7 @@
 const createError = require("../Utilities/createError");
 const prisma = require("../model/prisma");
 const { makeBookingSchema } = require("../validators/bookValidator");
+const { bookingItemScehema } = require("../validators/bookValidator");
 
 exports.createBooking = async (req, res, next) => {
     try {
@@ -54,6 +55,9 @@ exports.getBooking = async (req, res, next) => {
                         },
                     },
                 },
+                bookTime: {
+                    select: { bookTime: true },
+                },
             },
         });
         res.status(200).json(targetBooking);
@@ -88,6 +92,9 @@ exports.getBookingForAdmin = async (req, res, next) => {
                         memberInfomation: true,
                     },
                 },
+                bookTime: {
+                    select: { bookTime: true },
+                },
             },
             orderBy: {
                 bookDate: "asc",
@@ -109,6 +116,52 @@ exports.findBookedWithTimeAndHairStylistId = async (req, res, next) => {
                     { bookDate: newBookDate },
                     { hairStylistId: +hairStylistId },
                 ],
+            },
+        });
+        res.status(200).json(bookedItem);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.deleteBooking = async (req, res, next) => {
+    try {
+        const { value, error } = bookingItemScehema.validate(req.params);
+        console.log(value);
+        if (error) {
+            return next(error);
+        }
+        const bookedItem = await prisma.booking.findFirst({
+            where: {
+                id: value.bookId,
+                userId: req.user.id,
+            },
+        });
+        if (!bookedItem) {
+            return next(createError("can not delete booking "));
+        }
+
+        await prisma.booking.delete({
+            where: {
+                id: bookedItem.id,
+            },
+        });
+        res.status(200).json({ message: "delete success" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.editBookingForUser = async (req, res, next) => {
+    try {
+        const { value, error } = bookingItemScehema.validate(req.params);
+        if (error) {
+            return next(createError("Can not edit this booking"));
+        }
+        const bookedItem = await prisma.booking.findFirst({
+            where: {
+                id: value.bookId,
+                userId: req.user.id,
             },
         });
         res.status(200).json(bookedItem);

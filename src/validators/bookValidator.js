@@ -13,3 +13,9 @@ const makeBookingSchema = () => {
 };
 
 exports.makeBookingSchema = makeBookingSchema;
+
+const bookingItemScehema = Joi.object({
+    bookedId: Joi.number().required(),
+});
+
+exports.bookingItemScehema = bookingItemScehema;
