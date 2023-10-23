@@ -17,13 +17,9 @@ exports.createBooking = async (req, res, next) => {
 
         bookingDetail.hairStylistId = +bookingDetail.hairStylistId;
 
-        console.log(bookingDetail);
-
         const findBooked = await prisma.booking.findFirst({
             where: bookingDetail,
         });
-
-        console.log(findBooked);
 
         if (findBooked) {
             return res
@@ -31,7 +27,7 @@ exports.createBooking = async (req, res, next) => {
                 .json({ message: "วันและเวลาดังกล่าวได้ภูกจองไว้แล้ว" });
         }
 
-        if (!findBooked && req.user.role !== "ADMIN") {
+        if (!findBooked && req.user.role === "USER") {
             const booking = await prisma.booking.create({
                 data: bookingDetail,
             });
@@ -146,17 +142,18 @@ exports.findBookedWithTimeAndHairStylistId = async (req, res, next) => {
 exports.deleteBooking = async (req, res, next) => {
     try {
         const { value, error } = bookingItemScehema.validate(req.params);
-        console.log(value);
+
         if (error) {
             return next(error);
         }
+
         const bookedItem = await prisma.booking.findFirst({
             where: {
                 id: value.bookedId,
                 userId: req.user.id,
             },
         });
-        console.log(bookedItem.id);
+
         if (!bookedItem) {
             return next(createError("can not delete booking "));
         }
@@ -164,6 +161,7 @@ exports.deleteBooking = async (req, res, next) => {
         if (bookedItem.status === "ACCEPTED") {
             return res.status(400).json({ message: "can not delete booked" });
         }
+
         if (bookedItem.status !== "ACCEPTED") {
             await prisma.booking.delete({
                 where: {
@@ -179,16 +177,20 @@ exports.deleteBooking = async (req, res, next) => {
 
 exports.editBookingForUser = async (req, res, next) => {
     try {
+        if (new Date(req.body.bookDate) < new Date()) {
+            next(createError("exist date"));
+        }
         const { value, error } = bookingItemScehema.validate(req.params);
-        const { ...validateObj } = makeBookingSchemaForEdit().validate(
-            req.body
-        );
+        const { value: value2, error: error2 } =
+            makeBookingSchemaForEdit().validate(req.body);
+
+        const { serviceId } = value2;
+        delete value2.serviceId;
 
         if (error) {
             return next(createError("Can not edit this booking"));
         }
-
-        if (validateObj.error) {
+        if (error2) {
             return next(createError("โปรดกรอกข้อมูลให้ครบถ้วน"), 400);
         }
 
@@ -210,11 +212,26 @@ exports.editBookingForUser = async (req, res, next) => {
             return res.status(400).json({ message: "can not edit booked" });
         }
 
-        console.log(validateObj.value);
-
         const newBookedItem = await prisma.booking.update({
-            data: validateObj.value,
-            where: bookedItem,
+            data: value2,
+            where: {
+                id: bookedItem.id,
+            },
+        });
+
+        const findBookServiceWithBookId = await prisma.bookService.findFirst({
+            where: {
+                bookId: bookedItem.id,
+            },
+        });
+
+        await prisma.bookService.update({
+            data: {
+                serviceId: serviceId,
+            },
+            where: {
+                id: findBookServiceWithBookId.id,
+            },
         });
 
         res.status(200).json(newBookedItem);
@@ -236,7 +253,6 @@ exports.editStatusBookingForAdmin = async (req, res, next) => {
                 hairStylistId: req.user.id,
             },
         });
-        console.log(bookedItem);
 
         if (!bookedItem) {
             return next(createError("can not edit booking "));
