@@ -184,9 +184,7 @@ exports.editBookingForUser = async (req, res, next) => {
         const { value: value2, error: error2 } =
             makeBookingSchemaForEdit().validate(req.body);
 
-        const { serviceId } = value2;
-        delete value2.serviceId;
-
+        console.log(value2);
         if (error) {
             return next(createError("Can not edit this booking"));
         }
@@ -194,6 +192,8 @@ exports.editBookingForUser = async (req, res, next) => {
             return next(createError("โปรดกรอกข้อมูลให้ครบถ้วน"), 400);
         }
 
+        const { serviceId } = value2;
+        delete value2.serviceId;
         const bookedItem = await prisma.booking.findFirst({
             where: {
                 id: value.bookedId,
@@ -255,7 +255,7 @@ exports.editStatusBookingForAdmin = async (req, res, next) => {
         });
 
         if (!bookedItem) {
-            return next(createError("can not edit booking "));
+            return next(createError("can not edit booking .... "));
         }
 
         await prisma.booking.update({
